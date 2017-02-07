@@ -1,5 +1,5 @@
 <?php
-namespace ThinkSayDo\EnvTenant;
+namespace DanTheDJ\MultiTenant;
 
 use Illuminate\Console\Events\ArtisanStarting;
 use Illuminate\Foundation\Application;
@@ -11,11 +11,11 @@ use Symfony\Component\Console\Event\ConsoleTerminateEvent;
 use Symfony\Component\Console\Input\ArgvInput;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\EventDispatcher\EventDispatcher;
-use ThinkSayDo\EnvTenant\Events\TenantActivatedEvent;
-use ThinkSayDo\EnvTenant\Events\TenantResolvedEvent;
-use ThinkSayDo\EnvTenant\Events\TenantNotResolvedEvent;
-use ThinkSayDo\EnvTenant\Events\TenantNotResolvedException;
-use ThinkSayDo\EnvTenant\Contracts\TenantContract;
+use DanTheDJ\MultiTenant\Events\TenantActivatedEvent;
+use DanTheDJ\MultiTenant\Events\TenantResolvedEvent;
+use DanTheDJ\MultiTenant\Events\TenantNotResolvedEvent;
+use DanTheDJ\MultiTenant\Events\TenantNotResolvedException;
+use DanTheDJ\MultiTenant\Contracts\TenantContract;
 
 class TenantResolver
 {
