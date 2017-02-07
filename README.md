@@ -13,7 +13,7 @@ run that command on one or all tenants. Works on migrations, queueing, etc.!
 
 MultiTenant also offers a TenantContract, triggers Laravel events, and throws a TenantNotResolvedException and TenantDatabaseNameEmptyExcepion, so you can easily add in custom functionality and tweak it for your needs.
 
-Laravel MultiTenant was forked from @thinksaydo, who modified the original Tenantable project by @leemason. All of the main code is due to them. The different in this project is that it allows for a database per tenant, compared to a single database with table prefixes. This allows for a more managed approach in some cases.
+Laravel MultiTenant was forked from @thinksaydo, who modified the original Tenantable project by @leemason. All of the main code is due to them. The difference in this project is that it allows for a database per tenant, compared to a single database with table prefixes. This allows for a more managed approach in some cases.
 
 MultiTenant relies on your ENV and Database config and stores just the
 conneciton name in the table and only allows one subdomain and
@@ -47,7 +47,7 @@ DanTheDJ\MultiTenant\TenantServiceProvider::class,
 Tenant creation (just uses a standard Eloquent model):
 
 ```php
-$tenant = new \ThinkSayDo\EnvTenant\Tenant();
+$tenant = new \DanTheDJ\MultiTenant\Tenant();
 $tenant->name = 'ACME Inc.';
 $tenant->email = 'person@acmeinc.com';
 $tenant->subdomain = 'acme';
