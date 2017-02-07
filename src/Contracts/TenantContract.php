@@ -1,5 +1,5 @@
 <?php
-namespace ThinkSayDo\EnvTenant\Contracts;
+namespace DanTheDJ\MultiTenant\Contracts;
 
 interface TenantContract
 {

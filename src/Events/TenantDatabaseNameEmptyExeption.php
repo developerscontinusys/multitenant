@@ -1,7 +1,7 @@
 <?php
 namespace DanTheDJ\MultiTenant\Events;
 
-class TenantNotResolvedException extends \Exception
+class TenantDatabaseNameEmptyException extends \Exception
 {
     public function getTenant()
     {

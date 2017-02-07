@@ -1,5 +1,5 @@
 <?php
-namespace ThinkSayDo\EnvTenant\Events;
+namespace DanTheDJ\MultiTenant\Events;
 
 class TenantResolvedEvent extends TenantEvent
 {

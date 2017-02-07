@@ -23,7 +23,7 @@ class CreateTenantsTable extends Migration
             $table->string('subdomain')->unique()->nullable();
             $table->string('alias_domain')->unique()->nullable();
             $table->string('connection');
-            $table->text('meta');
+            $table->text('meta')->nullable();
 
             $table->softDeletes();
             $table->timestamps();

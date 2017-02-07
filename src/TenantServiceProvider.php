@@ -1,5 +1,5 @@
 <?php
-namespace ThinkSayDo\EnvTenant;
+namespace DanTheDJ\MultiTenant;
 
 use Illuminate\Support\ServiceProvider;
 

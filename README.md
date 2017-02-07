@@ -1,30 +1,6 @@
-## Laravel EnvTenant 2.2.*
+## Laravel MultiTenant 1.0
 
-**WARNING: This project is now discontinued and will no longer be updated. If you want to use it, the code is fairly straightforward, so feel free to Fork and continue as you see fit.**
-
-Version 2.2.10 Changes:
-
-- Laravel 5.3 support.
-
-Version 2.2.6 Changes:
-
-- Set connection column to 'pending' to block tenant access until admin approval.
-
-Version 2.2.3 Changes:
-
-- Added ability to get all Tenants
-- Added ability to activate and run a callback on all Tenant models
-- Added ability to get Tenant by ID instead of subdomain or domain (example.com/{tenantId})
-
-Version 2.2.2 Changes:
-
-- Removed generic listener
-- Removed public setDefaultConnection method
-- Changed resolver registration to be app('tenant')
-- Added TenantContract to enable custom models
-- Updated documentation
-
-The Laravel 5.2 EnvTenant package enables you to easily add multi-tenant capabilities to your application.
+The Laravel 5.3 MultiTenant package enables you to easily add multi-tenant capabilities to your application.
 This package is designed using a minimalist approach providing just the essentials - no views, routes,
 or configs. Just drop it in, run the migration, and start adding tenants. Your applications will
 have access to current tenant information through the dynamically set config('tenant') values.
@@ -33,19 +9,15 @@ could manage all tenant other accounts for example. And, perhaps the best part, 
 is completely multi-tenant aware! Just add the --tenant option to any command to
 run that command on one or all tenants. Works on migrations, queueing, etc.!
 
-EnvTenant also offers a TenantContract, triggers Laravel events, and throws a TenantNotResolvedException,
-so you can easily add in custom functionality and tweak it for your needs.
+MultiTenant also offers a TenantContract, triggers Laravel events, and throws a TenantNotResolvedException and TenantDatabaseNameEmptyExcepion, so you can easily add in custom functionality and tweak it for your needs.
 
-Laravel EnvTenant was originally forked from the Laravel Tenantable project by @leemason
-Lee is to be credited with doing a lot of the hard work to figure out how to globally
-add the --tenant option to Artisan and for inspiration for the idea. Where this
-project differs is in it's approach to managing database connection settings.
-Tenantable stores settings in the database and offers unlimited domains.
-EnvTenant relies on your ENV and Database config and stores just the
+Laravel MultiTenant was forked from @thinksaydo, who modified the original Tenantable project by @leemason. All of the main code is due to them. The different in this project is that it allows for a database per tenant, compared to a single database with table prefixes. This allows for a more managed approach in some cases.
+
+MultiTenant relies on your ENV and Database config and stores just the
 conneciton name in the table and only allows one subdomain and
 domain per tenant, which is most often plenty for most apps.
-EnvTenant also throws TenantNotResolvedException when
-tenants are not found, which you can catch.
+MultiTenant also throws a TenantNotResolvedException when
+tenants are not found, and a TenantDatabaseNameEmptyException when the database name could not be determined.
 
 
 ## Simple Installation & Usage
@@ -53,7 +25,7 @@ tenants are not found, which you can catch.
 Composer install:
 
 ```
-composer require thinksaydo/envtenant:2.2.*
+composer require danthedj/multitenant:1.0
 ```
 
 Then run composer dump-autoload.
@@ -61,13 +33,13 @@ Then run composer dump-autoload.
 Tenants database table install:
 
 ```php 
-artisan migrate --path /vendor/thinksaydo/envtenant/migrations
+artisan migrate --path /vendor/danthedj/multitenant/migrations
 ```
 
 Service provider install:
 
 ```php
-ThinkSayDo\EnvTenant\TenantServiceProvider::class,
+DanTheDJ\MultiTenant\TenantServiceProvider::class,
 ```
 
 Tenant creation (just uses a standard Eloquent model):
@@ -84,7 +56,7 @@ $tenant->save();
 ```
 
 And you're done! Minimalist, simple. Whenever your app is visited via http://acme.domain.com or http://acmeinc.com
-the default database connection will be set to "db1", the table prefix will switch to "acme_", and config('tenant')
+the default database connection will be set to "db1", the database name will switch to "acme_", and config('tenant')
 will be set with tenant details allowing you to access values from your views or application.
 
 
@@ -108,10 +80,10 @@ The --tenant option works on all Artisan commands.
 
 ### Tenant
 
-The ```\ThinkSayDo\EnvTenant\Tenant``` class is a simple Eloquent model providing basic tenant settings.
+The ```\DanTheDJ\MultiTenant\Tenant``` class is a simple Eloquent model providing basic tenant settings.
 
 ```php
-$tenant = new \ThinkSayDo\EnvTenant\Tenant();
+$tenant = new \DanTheDJ\MultiTenant\Tenant();
 
 // The unique name field identifies the tenant profile
 $tenant->name = 'ACME Inc.';
@@ -139,7 +111,7 @@ $tenant->save();
 
 ### TenantResolver
 
-The ```\ThinkSayDo\EnvTenant\TenantResolver``` class is responsible for resolving and managing the active tenant
+The ```\DanTheDJ\MultiTenant\TenantResolver``` class is responsible for resolving and managing the active tenant
 during Web and Artisan access. You can access the resolver class using ```app('tenant')```.
 
 ```php
@@ -203,35 +175,25 @@ Throughout the lifecycle events are fired allowing you to listen and customize b
 
 Tenant activated:
 ```php
-ThinkSayDo\EnvTenant\Events\TenantActivatedEvent
+DanTheDJ\MultiTenant\Events\TenantActivatedEvent
 ```
 
 Tenant resolved:
 ```php
-ThinkSayDo\EnvTenant\Events\TenantResolvedEvent
+DanTheDJ\MultiTenant\Events\TenantResolvedEvent
 ```
 
 Tenant not resolved:
 ```php
-ThinkSayDo\EnvTenant\Events\TenantNotResolvedEvent
+DanTheDJ\MultiTenant\Events\TenantNotResolvedEvent
 ```
 
 Tenant not resolved via the Web, an exception is thrown:
 ```php
-ThinkSayDo\EnvTenant\Events\TenantNotResolvedException
+DanTheDJ\MultiTenant\Events\TenantNotResolvedException
 ```
 
-
-# Securing sessions
-
-Sessions in Laravel can be locked down to a domain, preventing users from jumping across domains and potentially
-retaining their authentication. Here's some quick example code that might be useful. I'm sure there are more
-sophisticated ways to manage this. In the future, I may also add some cross domain security to EnvTenant.
-
-In your session config file, change the domain value to be something like this:
-
+Tenant database name not be determined or empty:
 ```php
-'domain' => ( ! empty($_SERVER['HTTP_HOST'])) ? $_SERVER['HTTP_HOST'] : null,
+DanTheDJ\MultiTenant\Events\TenantDatabaseNameEmptyException
 ```
-
-### Enjoy! Report issues or ideas.
