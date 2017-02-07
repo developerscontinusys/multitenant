@@ -11,7 +11,7 @@ could manage all tenant other accounts for example. And, perhaps the best part, 
 is completely multi-tenant aware! Just add the --tenant option to any command to
 run that command on one or all tenants. Works on migrations, queueing, etc.!
 
-MultiTenant also offers a TenantContract, triggers Laravel events, and throws a TenantNotResolvedException and TenantDatabaseNameEmptyExcepion, so you can easily add in custom functionality and tweak it for your needs.
+MultiTenant also offers a TenantContract, triggers Laravel events, and throws a TenantNotResolvedException and TenantDatabaseNameEmptyException, so you can easily add in custom functionality and tweak it for your needs.
 
 Laravel MultiTenant was forked from @thinksaydo, who modified the original Tenantable project by @leemason. All of the main code is due to them. The difference in this project is that it allows for a database per tenant, compared to a single database with table prefixes. This allows for a more managed approach in some cases.
 
@@ -30,9 +30,13 @@ Composer install:
 composer require danthedj/multitenant:1.0
 ```
 
-Then run composer dump-autoload.
+Generate composer autoload file:
 
-Tenants database table install:
+```
+composer dump-autoload
+```
+
+Tenants database table install (uses default database connection):
 
 ```php 
 artisan migrate --path /vendor/danthedj/multitenant/migrations
@@ -40,8 +44,32 @@ artisan migrate --path /vendor/danthedj/multitenant/migrations
 
 Service provider install:
 
+After `Illuminate\Database\DatabaseServiceProvider::class,` in `config/app.php` place the following to register the service provider:
+
 ```php
 DanTheDJ\MultiTenant\TenantServiceProvider::class,
+```
+
+Database connection:
+
+In `config/database.php` create a new connection. For the `host`, `port` ,`username` and `password`, these are picked up from the `.env` file.
+
+```php
+
+'tenant_db' => [
+    'driver' => 'mysql',
+    'host' => env('DB_HOST', '127.0.0.1'),
+    'port' => env('DB_PORT', '3306'),
+    'database' => '', // this will be filled in dynamically based on the tenant subdomain.
+    'username' => env('DB_USERNAME', 'forge'),
+    'password' => env('DB_PASSWORD', ''),
+    'charset' => 'utf8mb4',
+    'collation' => 'utf8mb4_unicode_ci',
+    'prefix' => 'tenant_', // this can be changed and represents a database prefix e.g. 'business_acme'
+    'strict' => true,
+    'engine' => null,
+],
+
 ```
 
 Tenant creation (just uses a standard Eloquent model):
@@ -52,13 +80,13 @@ $tenant->name = 'ACME Inc.';
 $tenant->email = 'person@acmeinc.com';
 $tenant->subdomain = 'acme';
 $tenant->alias_domain = 'acmeinc.com';
-$tenant->connection = 'db1';
+$tenant->connection = 'tenant_db';
 $tenant->meta = ['phone' => '123-123-1234'];
 $tenant->save();
 ```
 
 And you're done! Minimalist, simple. Whenever your app is visited via http://acme.domain.com or http://acmeinc.com
-the default database connection will be set to "db1", the database name will switch to "acme_", and config('tenant')
+the connection "tenant_db" will be used, the database name will switch to "{prefix}_acme", and config('tenant')
 will be set with tenant details allowing you to access values from your views or application.
 
 
@@ -67,7 +95,7 @@ will be set with tenant details allowing you to access values from your views or
 ### Artisan
 
 ```php
-// migrate master database tables
+// migrate master database tables (in tenant database)
 php artisan migrate
 
 // migrate specific tenant database tables
@@ -77,7 +105,12 @@ php artisan migrate --tenant=acme
 php artisan migrate --tenant=*
 ```
 
-The --tenant option works on all Artisan commands.
+The --tenant option works on all Artisan commands:
+
+```php
+php artisan migrate:rollback --tenant=acme
+
+```
 
 
 ### Tenant
