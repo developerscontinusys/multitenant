@@ -1,5 +1,7 @@
 ## Laravel MultiTenant 1.0
 
+[![Build Status](https://travis-ci.org/DanTheDJ/multitenant.svg?branch=master)](https://travis-ci.org/DanTheDJ/multitenant)
+
 The Laravel 5.3 MultiTenant package enables you to easily add multi-tenant capabilities to your application.
 This package is designed using a minimalist approach providing just the essentials - no views, routes,
 or configs. Just drop it in, run the migration, and start adding tenants. Your applications will
