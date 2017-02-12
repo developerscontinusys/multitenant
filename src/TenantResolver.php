@@ -97,6 +97,7 @@ class TenantResolver
 
             try
             {
+                (is_null($domain) ? throw new Exception(): )
                 $model = $this->tenant;
                 $tenant = $model
                     ->where('subdomain', '=', $domain)
