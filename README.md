@@ -24,13 +24,13 @@ tenants are not found, and a TenantDatabaseNameEmptyException when the database 
 
 ## Simple Installation & Usage
 
-Composer install:
+### Composer install:
 
 ```
 composer require danthedj/multitenant:1.0
 ```
 
-Generate composer autoload file:
+### Generate composer autoload file:
 
 ```
 composer dump-autoload
@@ -42,15 +42,29 @@ Tenants database table install (uses default database connection):
 artisan migrate --path /vendor/danthedj/multitenant/migrations
 ```
 
-Service provider install:
 
-After `Illuminate\Database\DatabaseServiceProvider::class,` in `config/app.php` place the following to register the service provider:
+### Service provider install:
+
+#### Resolve every route/request
+
+If you want to resolve the client on every route/request add in 
 
 ```php
 DanTheDJ\MultiTenant\TenantServiceProvider::class,
 ```
 
-Database connection:
+to the Service providers array in `config/app.php`
+
+#### Resolve tenants through Middleware
+
+If you only want to resolve tenant using a Middleware on a route add in
+
+```php
+DanTheDJ\MultiTenant\Providers\TenantMiddlewareServiceProvider::class,
+```
+to the Service providers array in `config/app.php` __instead__ of the service provider above.
+
+### Database connection:
 
 In `config/database.php` create a new connection. For the `host`, `port` ,`username` and `password`, these are picked up from the `.env` file.
 
