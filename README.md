@@ -1,22 +1,20 @@
-## Laravel MultiTenant 1.0
+## Laravel MultiTenant 1.4
 
 [![Build Status](https://travis-ci.org/DanTheDJ/multitenant.svg?branch=master)](https://travis-ci.org/DanTheDJ/multitenant)
 
-The Laravel 5.3 MultiTenant package enables you to easily add multi-tenant capabilities to your application.
-This package is designed using a minimalist approach providing just the essentials - no views, routes,
-or configs. Just drop it in, run the migration, and start adding tenants. Your applications will
-have access to current tenant information through the dynamically set config('tenant') values.
+The Laravel 5.4 MultiTenant package enables you to easily add multi-tenant capabilities to your application.
+This package is designed using a minimalist approach.Just drop it in, run the migration, and start adding tenants. Your applications will have access to current tenant information through the dynamically set config('tenant') values.
 Optionally, you can let applications reconnect to the default master database so a tenant
 could manage all tenant other accounts for example. And, perhaps the best part, Artisan
 is completely multi-tenant aware! Just add the --tenant option to any command to
 run that command on one or all tenants. Works on migrations, queueing, etc.!
 
-MultiTenant also offers a TenantContract, triggers Laravel events, and throws a TenantNotResolvedException and TenantDatabaseNameEmptyException, so you can easily add in custom functionality and tweak it for your needs.
+MultiTenant also offers a TenantContract, triggers Laravel events, throws a TenantNotResolvedException and TenantDatabaseNameEmptyException, so you can easily add in custom functionality and tweak it for your needs.
 
 Laravel MultiTenant was forked from @thinksaydo, who modified the original Tenantable project by @leemason. All of the main code is due to them. The difference in this project is that it allows for a database per tenant, compared to a single database with table prefixes. This allows for a more managed approach in some cases.
 
 MultiTenant relies on your ENV and Database config and stores just the
-conneciton name in the table and only allows one subdomain and
+connection name in the table and only allows one subdomain and
 domain per tenant, which is most often plenty for most apps.
 MultiTenant also throws a TenantNotResolvedException when
 tenants are not found, and a TenantDatabaseNameEmptyException when the database name could not be determined.
@@ -74,12 +72,13 @@ In `config/database.php` create a new connection. For the `host`, `port` ,`usern
     'driver' => 'mysql',
     'host' => env('DB_HOST', '127.0.0.1'),
     'port' => env('DB_PORT', '3306'),
-    'database' => '', // this will be filled in dynamically based on the tenant subdomain.
+    'database' => '', // The database name will be filled in dynamically upon the tenant being resolved.
     'username' => env('DB_USERNAME', 'forge'),
     'password' => env('DB_PASSWORD', ''),
     'charset' => 'utf8mb4',
     'collation' => 'utf8mb4_unicode_ci',
-    'prefix' => 'tenant_', // this can be changed and represents a database prefix e.g. 'business_acme'
+    'prefix' => '',
+    'database_prefix' => '', // this can be changed and represents a database prefix e.g. 'business_acme'.
     'strict' => true,
     'engine' => null,
 ],
@@ -123,6 +122,13 @@ The --tenant option works on all Artisan commands:
 
 ```php
 php artisan migrate:rollback --tenant=acme
+
+```
+
+You can also use the --tenant option when tinkering:
+
+```php
+php artisan tinker --tenant=acme
 
 ```
 
