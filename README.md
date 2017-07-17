@@ -25,7 +25,7 @@ tenants are not found, and a TenantDatabaseNameEmptyException when the database 
 ### Composer install:
 
 ```
-composer require danthedj/multitenant:1.0
+composer require danthedj/multitenant
 ```
 
 ### Generate composer autoload file:
