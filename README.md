@@ -55,6 +55,20 @@ DanTheDJ\MultiTenant\TenantServiceProvider::class,
 
 to the Service providers array in `config/app.php`
 
+
+*Note:* This is the default that Laravel 5.5 (and above) will use for auto discovery. If you want to use the middleware option please add the following to your project's composer.json file.
+
+```json
+    "extra": {
+        "laravel": {
+            "dont-discover": [
+                "DanTheDJ\\MultiTenant\\TenantServiceProvider"
+            ]
+        }
+    }
+```
+
+
 #### Resolve tenants through Middleware
 
 If you only want to resolve tenant using a Middleware on a route add in
