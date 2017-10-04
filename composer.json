@@ -26,5 +26,12 @@
         "psr-4": {
             "DanTheDJ\\MultiTenant\\": "src"
         }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "DanTheDJ\\MultiTenant\\TenantServiceProvider"
+            ]
+        }
     }
 }
