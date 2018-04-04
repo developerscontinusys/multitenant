@@ -161,6 +161,43 @@ class TenantResolver
         return;
     }
 
+    public function resolveBySubdomain($subDomain)
+    {
+
+        $model = $this->tenant;
+
+        $tenant = $model
+            ->where(function($query) use ($subDomain)
+            {
+                $query->where('subdomain', '=', $subDomain);
+            })
+            ->first();
+
+
+        if (
+            empty($tenant->connection) ||
+            ( ! empty($tenant->connection) && $tenant->connection === 'pending')
+        ) $tenant = null;
+
+        if ($tenant instanceof TenantContract)
+        {
+            $this->setActiveTenant($tenant);
+
+            event(new TenantResolvedEvent($tenant));
+
+            return;
+        }
+
+        event(new TenantNotResolvedEvent($subDomain));
+
+        if ( ! $this->app->runningInConsole())
+        {
+            throw new TenantNotResolvedException($subDomain);
+        }
+
+        return;
+    }
+
     protected function setDefaultConnection($activeTenant)
     {
         $hasConnection = ! empty($activeTenant->connection);
