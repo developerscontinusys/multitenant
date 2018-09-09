@@ -60,7 +60,7 @@ to the Service providers array in `config/app.php`
     "extra": {
         "laravel": {
             "dont-discover": [
-                "DanTheDJ\\MultiTenant\\TenantServiceProvider"
+                "danthedj/multitenant"
             ]
         }
     }
