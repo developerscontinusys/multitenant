@@ -16,21 +16,24 @@ use DanTheDJ\MultiTenant\Events\TenantResolvedEvent;
 use DanTheDJ\MultiTenant\Events\TenantNotResolvedEvent;
 use DanTheDJ\MultiTenant\Events\TenantNotResolvedException;
 use DanTheDJ\MultiTenant\Contracts\TenantContract;
+use Illuminate\Database\DatabaseManager;
 
 class TenantResolver
 {
     protected $app = null;
     protected $tenant = null;
+    protected $db = null;
     protected $request = null;
     protected $activeTenant = null;
     protected $consoleDispatcher = false;
     protected $defaultConnection = null;
     protected $tenantConnection = null;
 
-    public function __construct(Application $app, TenantContract $tenant)
+    public function __construct(Application $app, TenantContract $tenant, DatabaseManager $manager)
     {
         $this->app = $app;
         $this->tenant = $tenant;
+        $this->db = $manager;
         $this->defaultConnection = $this->app['db']->getDefaultConnection();
         $this->tenantConnection = 'envtenant';
         config()->set('database.connections.' . $this->tenantConnection, config('database.connections.' . $this->defaultConnection));
@@ -78,9 +81,6 @@ class TenantResolver
 
     public function resolveTenant()
     {
-        $this->registerTenantConsoleArgument();
-        $this->registerConsoleStartEvent();
-        $this->registerConsoleTerminateEvent();
         $this->resolveRequest();
     }
 
@@ -99,7 +99,7 @@ class TenantResolver
             {
                 if(is_null($domain))
                 {
-                  throw new \Exception();
+                    throw new \Exception();
                 }
                 $model = $this->tenant;
                 $tenant = $model
@@ -173,7 +173,6 @@ class TenantResolver
             })
             ->first();
 
-
         if (
             empty($tenant->connection) ||
             ( ! empty($tenant->connection) && $tenant->connection === 'pending')
@@ -216,10 +215,13 @@ class TenantResolver
         if ($hasConnection)
         {
             config()->set('tenant', $activeTenant->toArray());
-            $this->app['db']->purge($this->defaultConnection);
+            $this->purgeConnection();
         }
 
         $this->app['db']->setDefaultConnection($connection);
+
+        $this->purgeConnection();
+
     }
 
     protected function getConsoleDispatcher()
@@ -232,91 +234,11 @@ class TenantResolver
         return $this->consoleDispatcher;
     }
 
-    protected function registerTenantConsoleArgument()
+    public function purgeConnection()
     {
-        $this->app['events']->listen(ArtisanStarting::class, function($event)
-        {
-            $definition = $event->artisan->getDefinition();
 
-            $definition->addOption(
-                new InputOption('--tenant', null, InputOption::VALUE_OPTIONAL, 'The tenant subdomain or alias domain the command should be run for. Use * or all for every tenant.')
-            );
+        $this->db->purge();
 
-            $event->artisan->setDefinition($definition);
-            $event->artisan->setDispatcher($this->getConsoleDispatcher());
-        });
     }
 
-    protected function registerConsoleStartEvent()
-    {
-        $this->getConsoleDispatcher()->addListener(ConsoleEvents::COMMAND, function(ConsoleCommandEvent $event)
-        {
-            $tenant = $event->getInput()->getParameterOption('--tenant', null);
-
-            if ( ! is_null($tenant))
-            {
-                if ($tenant == '*' || $tenant == 'all')
-                {
-                    $event->disableCommand();
-                }
-                else
-                {
-                    if ($this->isResolved())
-                    {
-                        $event->getOutput()->writeln('<info>Running command for ' . $this->getActiveTenant()->name . '</info>');
-                    }
-                    else
-                    {
-                        $event->getOutput()->writeln('<error>Failed to resolve tenant</error>');
-                        $event->disableCommand();
-                    }
-                }
-            }
-        });
-    }
-
-    protected function registerConsoleTerminateEvent()
-    {
-        $this->getConsoleDispatcher()->addListener(ConsoleEvents::TERMINATE, function(ConsoleTerminateEvent $event)
-        {
-            $tenant = $event->getInput()->getParameterOption('--tenant', null);
-
-            if( ! is_null($tenant))
-            {
-                if ($tenant == '*' || $tenant == 'all')
-                {
-                    $command = $event->getCommand();
-                    $input = $event->getInput();
-                    $output = $event->getOutput();
-                    $exitCode = $event->getExitCode();
-
-                    $tenants = $this->getAllTenants();
-
-                    foreach($tenants as $tenant)
-                    {
-                        $this->setActiveTenant($tenant);
-
-                        $event->getOutput()->writeln('<info>Running command for ' . $this->getActiveTenant()->name . '</info>');
-
-                        try
-                        {
-                            $exitCode = $command->run($input, $output);
-                        }
-                        catch (\Exception $e)
-                        {
-                            $event = new ConsoleExceptionEvent($command, $input, $output, $e, $e->getCode());
-
-                            $this->getConsoleDispatcher()->dispatch(ConsoleEvents::EXCEPTION, $event);
-
-                            $e = $event->getException();
-
-                            throw $e;
-                        }
-                    }
-
-                    $event->setExitCode($exitCode);
-                }
-            }
-        });
-    }
 }
